@@ -329,6 +329,36 @@
 .pagination button i {
     font-size: 0.8rem;
 }
+
+.approve-btn {
+    background-color: #38b000;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.approve-btn:hover {
+    background-color: #2a8f00;
+}
+
+.reject-btn {
+    background-color: #d00000;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.reject-btn:hover {
+    background-color: #a30000;
+}
     </style>
 </head>
 <body>
@@ -380,7 +410,21 @@
         <div class="pagination" id="pagination">
             <!-- Pagination buttons will be added here -->
         </div>
-    </div>
+        <h2 style="margin-top: 40px;">Pending Asset Requests</h2>
+        <div class="table-container">
+          <table id="request-table">
+            <thead>
+                <tr>
+                   <th>Employee Name</th>
+                   <th>Asset</th>
+                   <th>Reason</th>
+                   <th>Actions</th>
+                </tr>
+            </thead>
+        <tbody></tbody>
+    </table>
+</div>
+</div>
     
 <script>
     // DOM elements
@@ -564,6 +608,76 @@ sortBy.addEventListener('change', () => {
 
 // Load data on page load
 window.onload = loadData;
+
+async function loadPendingRequests() {
+  try {
+    const response = await fetch('http://3.110.86.76:3070/api/requests');
+    const data = await response.json();
+
+    const requestTableBody = document.querySelector('#request-table tbody');
+    requestTableBody.innerHTML = '';
+
+    if (!data || !Array.isArray(data)) {
+      requestTableBody.innerHTML = '<tr><td colspan="4">No pending requests</td></tr>';
+      return;
+    }
+
+    data.forEach(request => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${request.employee_name}</td>
+        <td>${request.asset_name}</td>
+        <td>${request.reason || '—'}</td>
+        <td>
+          <button class="approve-btn" onclick="approveRequest(${request.id})">Approve</button>
+          <button class="reject-btn" onclick="rejectRequest(${request.id})">Reject</button>
+        </td>
+      `;
+      requestTableBody.appendChild(row);
+    });
+  } catch (error) {
+    console.error('Error loading requests:', error);
+  }
+}
+
+async function approveRequest(id) {
+  if (!confirm('Approve this request?')) return;
+  try {
+    const response = await fetch(`http://3.110.86.76:3070/api/requests/approve/${id}`, { method: 'POST' });
+    if (response.ok) {
+      alert('Request approved.');
+      loadPendingRequests();
+    } else {
+      const error = await response.json();
+      alert('Error: ' + error.error);
+    }
+  } catch (err) {
+    console.error('Approve error:', err);
+    alert('Failed to approve request.');
+  }
+}
+
+async function rejectRequest(id) {
+  if (!confirm('Reject this request?')) return;
+  try {
+    const response = await fetch(`http://3.110.86.76:3070/api/requests/reject/${id}`, { method: 'POST' });
+    if (response.ok) {
+      alert('Request rejected.');
+      loadPendingRequests();
+    } else {
+      const error = await response.json();
+      alert('Error: ' + error.error);
+    }
+  } catch (err) {
+    console.error('Reject error:', err);
+    alert('Failed to reject request.');
+  }
+}
+
+window.onload = () => {
+  loadData();            // existing delivery fetch function
+  loadPendingRequests(); // new pending requests fetch
+};
 </script>
 </body>
 </html>
