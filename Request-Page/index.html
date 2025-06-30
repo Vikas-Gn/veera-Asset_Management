@@ -723,6 +723,7 @@ async function loadRejectedRequests() {
         const response = await fetch(`http://3.110.86.76:3070/api/requests/approve/${request.id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
         });
         if (!response.ok) {
             const errorData = await response.json();
@@ -757,6 +758,7 @@ async function rejectRequest() {
         const response = await fetch(`http://3.110.86.76:3070/api/requests/reject/${request.id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
         });
         if (!response.ok) throw new Error('Failed to reject request');
         
