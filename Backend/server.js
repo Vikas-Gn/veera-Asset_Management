@@ -96,7 +96,7 @@ async function initializeDatabase() {
     console.log('Table rejected_requests created or already exists');
 
     // Optional: Insert sample data for testing (comment out in production)
-    const insertSampleData = fales; // Set to false to skip sample data insertion
+    const insertSampleData = true; // Set to false to skip sample data insertion
     if (insertSampleData) {
       await pool.query(`
         INSERT INTO asset_deliveries (employee_name, employee_id, department, assets)
