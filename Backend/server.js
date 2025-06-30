@@ -61,6 +61,7 @@ async function initializeDatabase() {
         asset_name VARCHAR(100) NOT NULL,
         reason TEXT NOT NULL,
         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        UNIQUE(employee_id, asset_name, reason)
       );
     `);
     console.log('Table asset_requests created or already exists');
@@ -74,6 +75,7 @@ async function initializeDatabase() {
         asset_name VARCHAR(100) NOT NULL,
         assigned_date DATE NOT NULL,
         status VARCHAR(20) NOT NULL
+        UNIQUE(employee_id, asset_name, assigned_date)
       );
     `);
     console.log('Table assigned_assets created or already exists');
@@ -88,12 +90,13 @@ async function initializeDatabase() {
         reason TEXT NOT NULL,
         rejected_date DATE NOT NULL,
         status VARCHAR(20) NOT NULL
+        UNIQUE(employee_id, asset_name, rejected_date)
       );
     `);
     console.log('Table rejected_requests created or already exists');
 
     // Optional: Insert sample data for testing (comment out in production)
-    const insertSampleData = true; // Set to false to skip sample data insertion
+    const insertSampleData = fales; // Set to false to skip sample data insertion
     if (insertSampleData) {
       await pool.query(`
         INSERT INTO asset_deliveries (employee_name, employee_id, department, assets)
