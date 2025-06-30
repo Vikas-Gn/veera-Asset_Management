@@ -100,7 +100,7 @@ async function initializeDatabase() {
     if (insertSampleData) {
       await pool.query(`
         INSERT INTO asset_deliveries (employee_name, employee_id, department, assets)
-        VALUES ('Veera', 'ATS0001', 'IT', '["Laptop", "Monitor"]')
+        VALUES ('Veera', 'ATS0001', 'IT', '["Laptop", "Monitor"]'::jsonb)
         ON CONFLICT DO NOTHING;
       `);
       await pool.query(`
