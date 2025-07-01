@@ -578,7 +578,7 @@ header p {
 
 async function loadRequestData() {
   try {
-    const response = await fetch('http://3.110.86.76:3070/api/requests');
+    const response = await fetch('http://13.233.138.24:3070/api/requests');
     console.log('Fetching requests, status:', response.status);
     if (!response.ok) {
       const errorText = await response.text();
@@ -631,7 +631,7 @@ async function loadAssignedAssets() {
     const assetsContainer = document.getElementById('assignedAssets');
     
     try {
-        const response = await fetch('http://3.110.86.76:3070/api/assigned-assets');
+        const response = await fetch('http://13.233.138.24:3070/api/assigned-assets');
         if (!response.ok) throw new Error('Failed to fetch assigned assets');
         const assignedAssets = await response.json();
         
@@ -670,7 +670,7 @@ async function loadRejectedRequests() {
     const rejectedContainer = document.getElementById('rejectedRequests');
     
     try {
-        const response = await fetch('http://3.110.86.76:3070/api/rejected-requests');
+        const response = await fetch('http://13.233.138.24:3070/api/rejected-requests');
         if (!response.ok) throw new Error('Failed to fetch rejected requests');
         const rejectedRequests = await response.json();
         
@@ -720,10 +720,9 @@ async function loadRejectedRequests() {
     const request = requests[currentRequestIndex];
     
     try {
-        const response = await fetch(`http://3.110.86.76:3070/api/requests/approve/${request.id}`, {
+        const response = await fetch(`http://13.233.138.24:3070/api/requests/approve/${request.id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})
         });
         if (!response.ok) {
             const errorData = await response.json();
@@ -755,10 +754,9 @@ async function rejectRequest() {
     const request = requests[currentRequestIndex];
     
     try {
-        const response = await fetch(`http://3.110.86.76:3070/api/requests/reject/${request.id}`, {
+        const response = await fetch(`http://13.233.138.24:3070/api/requests/reject/${request.id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})
         });
         if (!response.ok) throw new Error('Failed to reject request');
         

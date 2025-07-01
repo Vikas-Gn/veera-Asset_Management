@@ -1,3 +1,4 @@
+
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
@@ -61,7 +62,6 @@ async function initializeDatabase() {
         asset_name VARCHAR(100) NOT NULL,
         reason TEXT NOT NULL,
         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        UNIQUE(employee_id, asset_name, reason)
       );
     `);
     console.log('Table asset_requests created or already exists');
@@ -75,7 +75,6 @@ async function initializeDatabase() {
         asset_name VARCHAR(100) NOT NULL,
         assigned_date DATE NOT NULL,
         status VARCHAR(20) NOT NULL
-        UNIQUE(employee_id, asset_name, assigned_date)
       );
     `);
     console.log('Table assigned_assets created or already exists');
@@ -90,7 +89,6 @@ async function initializeDatabase() {
         reason TEXT NOT NULL,
         rejected_date DATE NOT NULL,
         status VARCHAR(20) NOT NULL
-        UNIQUE(employee_id, asset_name, rejected_date)
       );
     `);
     console.log('Table rejected_requests created or already exists');
@@ -100,7 +98,7 @@ async function initializeDatabase() {
     if (insertSampleData) {
       await pool.query(`
         INSERT INTO asset_deliveries (employee_name, employee_id, department, assets)
-        VALUES ('Veera', 'ATS0001', 'IT', '["Laptop", "Monitor"]'::jsonb)
+        VALUES ('Veera', 'ATS0001', 'IT', '["Laptop", "Monitor"]')
         ON CONFLICT DO NOTHING;
       `);
       await pool.query(`
@@ -192,83 +190,6 @@ app.post('/api/requests', async (req, res) => {
     res.status(500).json({ error: 'Failed to save request' });
   }
 });
-
-// Approve asset request
-app.post('/api/requests/approve/:id', async (req, res) => {
-  const requestId = req.params.id;
-  console.log('Approving request with ID:', requestId);
-
-  if (!requestId) {
-    return res.status(400).json({ error: 'Request ID is required' });
-  }
-
-  try {
-    // Fetch the request details
-    const { rows } = await pool.query(
-      'SELECT * FROM asset_requests WHERE id = $1',
-      [requestId]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Request not found' });
-    }
-
-    const request = rows[0];
-
-    // Move to assigned_assets table
-    await pool.query(
-      'INSERT INTO assigned_assets (employee_name, employee_id, asset_name, assigned_date, status) VALUES ($1, $2, $3, CURRENT_DATE, $4)',
-      [request.employee_name, request.employee_id, request.asset_name, 'Assigned']
-    );
-
-    // Remove from asset_requests
-    await pool.query('DELETE FROM asset_requests WHERE id = $1', [requestId]);
-
-    res.status(200).json({ message: 'Request approved and asset assigned' });
-  } catch (error) {
-    console.error('Error approving request:', error);
-    res.status(500).json({ error: 'Failed to approve request' });
-  }
-});
-
-// Reject asset request
-app.post('/api/requests/reject/:id', async (req, res) => {
-  const requestId = req.params.id;
-  console.log('Rejecting request with ID:', requestId);
-
-  if (!requestId) {
-    return res.status(400).json({ error: 'Request ID is required' });
-  }
-
-  try {
-    // Fetch the request details
-    const { rows } = await pool.query(
-      'SELECT * FROM asset_requests WHERE id = $1',
-      [requestId]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Request not found' });
-    }
-
-    const request = rows[0];
-
-    // Move to rejected_requests table
-    await pool.query(
-      'INSERT INTO rejected_requests (employee_name, employee_id, asset_name, reason, rejected_date, status) VALUES ($1, $2, $3, $4, CURRENT_DATE, $5)',
-      [request.employee_name, request.employee_id, request.asset_name, request.reason, 'Rejected']
-    );
-
-    // Remove from asset_requests
-    await pool.query('DELETE FROM asset_requests WHERE id = $1', [requestId]);
-
-    res.status(200).json({ message: 'Request rejected' });
-  } catch (error) {
-    console.error('Error rejecting request:', error);
-    res.status(500).json({ error: 'Failed to reject request' });
-  }
-});
-
 
 // Page 2: HR Asset Management - Get all asset deliveries with filtering and pagination
 // Page 2: HR Asset Management - Get all asset deliveries with filtering
