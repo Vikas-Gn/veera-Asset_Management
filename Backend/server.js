@@ -332,24 +332,16 @@ app.post('/api/requests/approve/:id', async (req, res) => {
 
     const request = requestResult.rows[0];
 
-    // Check for duplicate asset in assigned_assets table
-    const existingAssetDirect = await pool.query(
+    // Check for duplicate asset
+    const existingAsset = await pool.query(
       'SELECT * FROM assigned_assets WHERE employee_id = $1 AND asset_name = $2',
       [request.employee_id, request.asset_name]
     );
-
-    // Check for duplicate asset in asset_deliveries (JSON array)
-    const existingAssetDelivery = await pool.query(
-      `SELECT * FROM asset_deliveries 
-       WHERE employee_id = $1 AND assets::text ILIKE $2`,
-      [request.employee_id, `%${request.asset_name}%`]
-    );
-
-    if (existingAssetDirect.rows.length > 0 || existingAssetDelivery.rows.length > 0) {
+    if (existingAsset.rows.length > 0) {
       return res.status(400).json({ error: 'This employee already has this asset assigned' });
     }
 
-  // Insert into assigned_assets
+    // Insert into assigned_assets
     await pool.query(
       'INSERT INTO assigned_assets (employee_name, employee_id, asset_name, assigned_date, status) VALUES ($1, $2, $3, $4, $5)',
       [request.employee_name, request.employee_id, request.asset_name, new Date().toISOString().split('T')[0], 'Assigned']
